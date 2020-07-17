@@ -34,14 +34,13 @@
 
 #This document generates NDC constraints for GCAM by taking in baseline emissions and baseline GDP
 #and creating constratins consistent with the iNDCs based off these values. As GCAM currently has a base year
-#of 2010 the reference case the iNDCs are based off of will be essentially a BAU without the NDCs as very
-#little action had taken place by 2010. When GCAM moves its base year forward new considerations will need to be
+#of 2015 the reference case the iNDCs are based off of will be essentially a BAU without the NDCs as
+#little action had taken place by 2015. When GCAM moves its base year forward new considerations will need to be
 #taken to alter this script. NOTE: GHG emissions price modifiers are based off of AR4
 #JEH June 2019
 
 #TO DO
 #   Allow regions to specify their own demand adjuster (AR4, AR5, etc)
-#   Decide what to do with conditional commitments
 #   Alter values for indicative targets
 
 #This version of the script uses AR4 to judge GHGs, but countries based their constraints off of several studies,
@@ -56,7 +55,6 @@
 #
 # Original backend module developed by Ben Bond-Lamberty, November 2012
 # Modified by GPK, May 2017
-# Modified by Rich Plevin, May 2017 to add command-line argument processing
 
 # See https://cran.r-project.org/web/packages/argparser/argparser.pdf
 
@@ -82,7 +80,14 @@ MAPPING_DIR <- file.path("data", "mapping")
 DATA_DIR <- file.path("data", "commitments")
 HIST_EMIS <- file.path("data", "hist_emissions")
 
+
+#This header is attached to csv tables to have easily manipulable files
+
 LINK_FILE_HEADER <- "INPUT_TABLE\nVariable ID\nGHGLink_start\n"
+
+
+#These GCAM regions are individual countries (other than australia_NZ), and so don't require the
+#aggregation scheme applied to the other regions
 
 UNAGGREGATED_CONSTRAINTS <- c("USA", "Australia_NZ", "Brazil",
                               "Canada", "China", "EU",
@@ -90,7 +95,10 @@ UNAGGREGATED_CONSTRAINTS <- c("USA", "Australia_NZ", "Brazil",
                               "Mexico", "Pakistan", "Russia",
                               "South Africa", "South Korea",
                               "Taiwan", "Argentina", "Colombia")
-OMITTED_MARKETS <- c("USA")
+
+#If there's any market you want to remove eg the US after it recinded
+#from the Paris accords
+OMITTED_MARKETS <- c()
 
 NDC_START_YEAR <- 2020
 NDC_END_YEAR <- 2030
@@ -477,7 +485,9 @@ NDC_commitments %>%
   select(region, ghgpolicy, conditional, market, year, value) %>%
   unique() %>%
   #Filter out any region that did not have any NDC commitments
-  filter(!(market %in% uncommitted_regions & year <= NDC_END_YEAR))->
+  filter(!(market %in% uncommitted_regions & year <= NDC_END_YEAR)) %>%
+  # mutate(value = value *0.8) %>%
+  filter(year > 2020) ->
   NDC_cont_ambitions
 
 #Calculate cont_ambition (minium 2% decarbonization rate) with Global markets (regions can 'trade' emissions)
@@ -581,7 +591,7 @@ NDC_1p5_deg_CN <- filter(NDC_1p5_deg, conditional == "CN") %>% select(-condition
 ####Write the outputs as xmls####
 #===========================================================================
 shared_markets <- MARKET_MAPPING %>% filter(duplicated(market), !market %in% OMITTED_MARKETS) %>% mutate(ghgpolicy = "GHG") %>% select(region, ghgpolicy, market)
-global_market <- data.frame(region = MARKET_MAPPING$region[!MARKET_MAPPING$region %in% NDC_cont_ambitions_global$region],
+global_market <- data.frame(region = MARKET_MAPPING$region[((!MARKET_MAPPING$region %in% NDC_cont_ambitions_global$region) & !(MARKET_MAPPING$region %in% OMITTED_MARKETS))],
                                 ghgpolicy = "GHG",
                                 market = "Global")
 

@@ -1,0 +1,5 @@
+  #NDC Constraint
+  level2_data_names[["GHGConstrMkt"]] <- c("region", "ghgpolicy", "market")
+  level2_data_names[["GHGConstrLong"]] <- c("region", "ghgpolicy", "market", "year", "value")
+  level2_data_names[["GHGLINK_start"]] <- c("region", "linked-ghg-policy", "price-adjust-year", "price-adjust", "demand-adjust-year", "demand-adjust", "market", "linked-policy", "price-unit", "output-unit")
+  level2_data_names[["GHGLINK_start_LUC"]] <- c("region", "linked-ghg-policy", "price-adjust-year-fillout", "price-adjust-year", "price-adjust", "demand-adjust-year-fillout", "demand-adjust-year", "demand-adjust", "market", "linked-policy", "price-unit", "output-unit")

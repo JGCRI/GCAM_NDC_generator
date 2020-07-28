@@ -413,11 +413,11 @@ individual_NDC_constraints_R_C %>%
 NDC_constraints <- bind_rows(NDC_individual_2025, NDC_individual_2030, aggregate_NDC_R_C_Y)
 
 #Indonesia says that it will be emitting more than GCAM's BAU, so replace any over emissions with baselines
-NDC_constraints %>%
-  left_join(coppenhagen_emissions, by = c("market", "year")) %>%
-  mutate(value = if_else(value.y<value.x, value.y, value.x)) %>%
-  select(names(NDC_constraints)) ->
-  NDC_constraints
+# NDC_constraints %>%
+#   left_join(coppenhagen_emissions, by = c("market", "year")) %>%
+#   mutate(value = if_else(value.y<value.x, value.y, value.x)) %>%
+#   select(names(NDC_constraints)) ->
+#   NDC_constraints
 
 BASE_EMISSIONS %>%
   mutate(market = as.character(market)) %>%
